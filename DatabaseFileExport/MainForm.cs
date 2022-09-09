@@ -22,10 +22,6 @@ namespace DatabaseFileExport
             InitializeComponent();
         }
 
-        private void InsertButton_Click(object sender, EventArgs e)
-        {
-        }
-
         private async void CheckConnectionStringButton_Click(object sender, EventArgs e)
         {
             SelectDataBaseTableComboBox.SelectedItem = null;
@@ -127,6 +123,36 @@ namespace DatabaseFileExport
 
                     SelectFileButton.Text = fileName.Name;
                 }
+            }
+        }
+        
+        private async void InsertButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string columnToUpdate = ColumnToUpdateComboBox.SelectedItem.ToString();
+                string filterTableComboBox = FilterTableComboBox.SelectedItem.ToString();
+                string filterText = FilterTextBox.Text;
+
+                string updateFileSql =
+                    $"UPDATE {ExportFileModel.DataBaseTable} SET [{columnToUpdate}] = @IM WHERE [{filterTableComboBox}] = N'{filterText}'";
+
+                SqlCommand updateFileCommand = new SqlCommand(updateFileSql);
+                byte[] imageData = File.ReadAllBytes(ExportFileModel.FilePath);
+                updateFileCommand.Parameters.AddWithValue("@IM", imageData);
+
+                SqlDataManager updateDbTable = new SqlDataManager(ExportFileModel.Connectionstring.ConnectionString);
+                await updateDbTable.Execute(updateFileCommand);
+
+                LogToUser.Log<DialogResult>(LogLevel.Info, "Готово");
+            }
+            catch (SqlException sqlEx)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Fatal, $"Ошибка выполнения SQL запроса \n\n{sqlEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Fatal, $"Ошибка \n\n {ex.Message}");
             }
         }
     }
