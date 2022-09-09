@@ -14,7 +14,7 @@ namespace DatabaseFileExport
 {
     public partial class Form1 : Form
     {
-        private static UpdateFileModel FileModel;
+        private static ExportFileModel ExportFileModel;
         private readonly LogToUser LogToUser = new LogToUser();
 
         public Form1()
@@ -31,7 +31,7 @@ namespace DatabaseFileExport
             SelectDataBaseTableComboBox.SelectedItem = null;
             SelectDataBaseTableComboBox.SelectedText = "Выбрать таблицу";
 
-            FileModel = new UpdateFileModel();
+            ExportFileModel = new ExportFileModel();
             if (ConnectionStringTextBox.Text.Length < 5)
             {
                 LogToUser.Log<DialogResult>(LogLevel.Error, "Неверный формат строки подключения!");
@@ -42,9 +42,9 @@ namespace DatabaseFileExport
 
                 try
                 {
-                    FileModel.Connectionstring = new SqlConnectionStringBuilder(ConnectionStringTextBox.Text);
+                    ExportFileModel.Connectionstring = new SqlConnectionStringBuilder(ConnectionStringTextBox.Text);
 
-                    DataTable tablesNames = await GetAllTablesFromDB.Get(FileModel.Connectionstring);
+                    DataTable tablesNames = await GetAllTablesFromDB.Get(ExportFileModel.Connectionstring);
                     SelectDataBaseTableComboBox.Fill(tablesNames, "TABLE_NAME");
                 }
                 catch (KeyNotFoundException keyEx)
@@ -87,11 +87,11 @@ namespace DatabaseFileExport
                 if (!(sender is ComboBox combobox)) return;
 
                 DBTableNameTextBox.Text = combobox.SelectedItem.ToString();
-                FileModel.DataBaseTable = combobox.SelectedItem.ToString();
+                ExportFileModel.DataBaseTable = combobox.SelectedItem.ToString();
 
-                SqlDataManager getAllColumnsNames = new SqlDataManager(FileModel.Connectionstring.ConnectionString);
+                SqlDataManager getAllColumnsNames = new SqlDataManager(ExportFileModel.Connectionstring.ConnectionString);
                 DataTable tableColumns = await getAllColumnsNames.Execute(new SqlCommand(
-                    $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{FileModel.DataBaseTable}'"));
+                    $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{ExportFileModel.DataBaseTable}'"));
 
                 TableColumnComboBox.Fill(tableColumns, "COLUMN_NAME");
                 TableColumn2ComboBox.Fill(tableColumns, "COLUMN_NAME");
@@ -121,7 +121,7 @@ namespace DatabaseFileExport
 
                 if (getFile.ShowDialog() == DialogResult.OK)
                 {
-                    FileModel.FilePath = getFile.FileName;
+                    ExportFileModel.FilePath = getFile.FileName;
 
                     FileInfo fileName = new FileInfo(getFile.FileName);
 

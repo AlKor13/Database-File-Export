@@ -2,7 +2,7 @@
 
 namespace DatabaseFileExport.Models
 {
-    public class UpdateFileModel
+    public class ExportFileModel
     {
         public SqlConnectionStringBuilder Connectionstring { get; set; }
         public string DataBaseTable { get; set; }
