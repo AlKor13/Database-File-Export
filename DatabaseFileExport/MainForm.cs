@@ -42,6 +42,7 @@ namespace DatabaseFileExport
 
                     DataTable tablesNames = await GetAllTablesFromDB.Get(ExportFileModel.Connectionstring);
                     SelectDataBaseTableComboBox.Fill(tablesNames, "TABLE_NAME");
+                    DBTablePanel.Visible = true;
                 }
                 catch (KeyNotFoundException keyEx)
                 {
@@ -89,10 +90,11 @@ namespace DatabaseFileExport
                 DataTable tableColumns = await getAllColumnsNames.Execute(new SqlCommand(
                     $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{ExportFileModel.DataBaseTable}'"));
 
-                TableColumnComboBox.Fill(tableColumns, "COLUMN_NAME");
-                TableColumn2ComboBox.Fill(tableColumns, "COLUMN_NAME");
+                ColumnToUpdateComboBox.Fill(tableColumns, "COLUMN_NAME");
+                FilterTableComboBox.Fill(tableColumns, "COLUMN_NAME");
 
-                panel1.Visible = true;
+                SQLQueryPanel.Visible = true;
+                InsertButton.Visible = true;
             }
             catch (SqlException sqlEx)
             {
