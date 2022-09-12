@@ -83,6 +83,9 @@ namespace DatabaseFileExport
             {
                 if (!(sender is ComboBox combobox)) return;
 
+                SQLQueryPanel.Visible = false;
+                InsertButton.Visible = false;
+                
                 DBTableNameTextBox.Text = combobox.SelectedItem.ToString();
                 ExportFileModel.DataBaseTable = combobox.SelectedItem.ToString();
 
@@ -90,11 +93,21 @@ namespace DatabaseFileExport
                 DataTable tableColumns = await getAllColumnsNames.Execute(new SqlCommand(
                     $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{ExportFileModel.DataBaseTable}'"));
 
-                ColumnToUpdateComboBox.Fill(tableColumns, "COLUMN_NAME");
-                FilterTableComboBox.Fill(tableColumns, "COLUMN_NAME");
+                DataTable varbinaryColumn = await getAllColumnsNames.Execute(new SqlCommand(
+                    $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{ExportFileModel.DataBaseTable}' AND DATA_TYPE = 'varbinary'"));
 
-                SQLQueryPanel.Visible = true;
-                InsertButton.Visible = true;
+                if (varbinaryColumn.Rows.Count == 0)
+                {
+                    LogToUser.Log<DialogResult>(LogLevel.Error,
+                        $"В таблице {ExportFileModel.DataBaseTable} нет столбца с типом varbinary");
+                }
+                else
+                {
+                    ColumnToUpdateComboBox.Fill(varbinaryColumn, "COLUMN_NAME");
+                    FilterTableComboBox.Fill(tableColumns, "COLUMN_NAME");
+                    SQLQueryPanel.Visible = true;
+                    InsertButton.Visible = true;
+                }
             }
             catch (SqlException sqlEx)
             {

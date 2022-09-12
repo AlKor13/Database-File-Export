@@ -245,7 +245,7 @@
             this.DBTablePanel.TabIndex = 22;
             this.DBTablePanel.Visible = false;
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -259,8 +259,10 @@
             this.Controls.Add(this.ConnectionStringLabel);
             this.Controls.Add(this.LogoLabel);
             this.Controls.Add(this.ConnectionStringTextBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Location = new System.Drawing.Point(15, 15);
-            this.Name = "Form1";
+            this.MaximizeBox = false;
+            this.Name = "MainForm";
             this.SQLQueryPanel.ResumeLayout(false);
             this.SQLQueryPanel.PerformLayout();
             this.DBTablePanel.ResumeLayout(false);
