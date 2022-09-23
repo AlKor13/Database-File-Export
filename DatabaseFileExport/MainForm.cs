@@ -170,5 +170,19 @@ namespace DatabaseFileExport
                 LogToUser.Log<DialogResult>(LogLevel.Fatal, $"Ошибка \n\n {ex.Message}");
             }
         }
+
+        private static bool IsItemSelected(params ComboBox[] comboBoxes)
+        {
+            foreach (ComboBox comboboxToValidate in comboBoxes)
+            {
+                if (comboboxToValidate.SelectedItem == null) 
+                    return false;
+                
+                if (string.IsNullOrEmpty(comboboxToValidate.SelectedItem.ToString()) || comboboxToValidate.SelectedItem.ToString() == " ")
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
