@@ -157,6 +157,10 @@ namespace DatabaseFileExport
                 string filterTableComboBox = FilterTableComboBox.SelectedItem.ToString();
                 string filterText = FilterTextBox.Text;
 
+                if (string.IsNullOrWhiteSpace(filterText))
+                    if (LogToUser.Log<DialogResult>(LogLevel.Info, "Поле фильтрации не заполненно.\nПродолжить?") == DialogResult.Cancel)
+                        return;
+                
                 string updateFileSql =
                     $"UPDATE {ExportFileModel.DataBaseTable} SET [{columnToUpdate}] = @IM WHERE [{filterTableComboBox}] = N'{filterText}'";
 
