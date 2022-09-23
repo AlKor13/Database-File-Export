@@ -145,6 +145,14 @@ namespace DatabaseFileExport
         {
             try
             {
+                bool isItemsSelected = IsItemSelected(ColumnToUpdateComboBox, FilterTableComboBox);
+
+                if (!isItemsSelected)
+                {
+                    LogToUser.Log<DialogResult>(LogLevel.Error, "Выберите данные из выпадающего списка!");
+                    return;
+                }
+                
                 string columnToUpdate = ColumnToUpdateComboBox.SelectedItem.ToString();
                 string filterTableComboBox = FilterTableComboBox.SelectedItem.ToString();
                 string filterText = FilterTextBox.Text;
