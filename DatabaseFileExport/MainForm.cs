@@ -12,12 +12,12 @@ using DatabaseFileExport.MyExtensions;
 
 namespace DatabaseFileExport
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private static ExportFileModel ExportFileModel;
         private readonly LogToUser LogToUser = new LogToUser();
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
