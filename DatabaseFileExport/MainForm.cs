@@ -173,14 +173,16 @@ namespace DatabaseFileExport
                 string filterText = FilterTextBox.Text;
 
                 if (string.IsNullOrWhiteSpace(filterText))
-                    if (LogToUser.Log<DialogResult>(LogLevel.Info, "Поле фильтрации не заполненно.\nПродолжить?") == DialogResult.Cancel)
+                    if (LogToUser.Log<DialogResult>(LogLevel.Info, "Поле фильтрации не заполненно.\nПродолжить?") ==
+                        DialogResult.Cancel)
                         return;
-                
+
                 string updateFileSql =
                     $"UPDATE {ExportFileModel.DataBaseTable} SET [{columnToUpdate}] = @IM WHERE [{filterTableComboBox}] = N'{filterText}'";
 
                 SqlCommand updateFileCommand = new SqlCommand(updateFileSql);
-                byte[] imageData = File.ReadAllBytes(ExportFileModel.FilePath);
+                byte[] imageData = FileWorker.GetFileBytes(ExportFileModel.FilePath);
+
                 updateFileCommand.Parameters.AddWithValue("@IM", imageData);
 
                 SqlDataManager updateDbTable = new SqlDataManager(ExportFileModel.Connectionstring.ConnectionString);
@@ -188,9 +190,13 @@ namespace DatabaseFileExport
 
                 LogToUser.Log<DialogResult>(LogLevel.Info, "Готово");
             }
+            catch (FileWorkerException fileEx)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Error, $"Ошибка чтения выбранного файла. \n\n{fileEx.Message}");
+            }
             catch (SqlException sqlEx)
             {
-                LogToUser.Log<DialogResult>(LogLevel.Fatal, $"Ошибка выполнения SQL запроса \n\n{sqlEx.Message}");
+                LogToUser.Log<DialogResult>(LogLevel.Fatal, $"Ошибка выполнения SQL-запроса. \n\n{sqlEx.Message}");
             }
             catch (Exception ex)
             {
