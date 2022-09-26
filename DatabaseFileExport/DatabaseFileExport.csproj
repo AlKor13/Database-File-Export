@@ -65,10 +65,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\GetAllTablesFromDB.cs" />
+    <Compile Include="Classes\HelpClasses\FileWorker.cs" />
     <Compile Include="Classes\LogToUser.cs" />
     <Compile Include="Classes\SQLDataManager.cs" />
     <Compile Include="Enums\LogLevel.cs" />
     <Compile Include="Exceptions\FillException.cs" />
+    <Compile Include="Exceptions\FileWorkerException.cs" />
     <Compile Include="Interfaces\ILogger.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
