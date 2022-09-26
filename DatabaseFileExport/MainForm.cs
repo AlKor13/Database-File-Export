@@ -125,19 +125,28 @@ namespace DatabaseFileExport
 
         private void SelectFileButton_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog getFile = new OpenFileDialog())
+            try
             {
-                getFile.Title = "Выбирите файл который нужно вставить в базу данных";
-                getFile.Multiselect = false;
-
-                if (getFile.ShowDialog() == DialogResult.OK)
+                using (OpenFileDialog getFile = new OpenFileDialog())
                 {
-                    ExportFileModel.FilePath = getFile.FileName;
+                    getFile.Title = "Выбирите файл который нужно вставить в базу данных";
+                    getFile.Multiselect = false;
 
-                    FileInfo fileName = new FileInfo(getFile.FileName);
-
-                    SelectFileButton.Text = fileName.Name;
+                    if (FileWorker.SelectFileFromPC(getFile))
+                    {
+                        ExportFileModel.FilePath = getFile.FileName;
+                        FileInfo fileName = new FileInfo(getFile.FileName);
+                        SelectFileButton.Text = fileName.Name;
+                    }
                 }
+            }
+            catch (FileWorkerException fileEx)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Error, $"Произошла ошибка при выборе файла.\n{fileEx.Message}");
+            }
+            catch (Exception exception)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Fatal, $"Ошибка! {exception.Message}");
             }
         }
         
