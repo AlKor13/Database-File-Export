@@ -161,7 +161,13 @@ namespace DatabaseFileExport
                     LogToUser.Log<DialogResult>(LogLevel.Error, "Выберите данные из выпадающего списка!");
                     return;
                 }
-                
+
+                if (string.IsNullOrEmpty(ExportFileModel.FilePath))
+                {
+                    LogToUser.Log<DialogResult>(LogLevel.Error, "Экспортируемый файл обязателен! \nПожалуйста выберете файл");
+                    return;
+                }
+
                 string columnToUpdate = ColumnToUpdateComboBox.SelectedItem.ToString();
                 string filterTableComboBox = FilterTableComboBox.SelectedItem.ToString();
                 string filterText = FilterTextBox.Text;
