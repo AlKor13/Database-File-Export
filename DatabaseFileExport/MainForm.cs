@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Windows.Forms;
 using DatabaseFileExport.Classes;
+using DatabaseFileExport.Classes.HelpClasses;
 using DatabaseFileExport.Enums;
 using DatabaseFileExport.Exceptions;
 using DatabaseFileExport.Models;
