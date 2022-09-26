@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.ConnectionStringTextBox = new System.Windows.Forms.TextBox();
             this.LogoLabel = new System.Windows.Forms.Label();
             this.ConnectionStringLabel = new System.Windows.Forms.Label();
@@ -260,6 +261,7 @@
             this.Controls.Add(this.LogoLabel);
             this.Controls.Add(this.ConnectionStringTextBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Location = new System.Drawing.Point(15, 15);
             this.MaximizeBox = false;
             this.Name = "MainForm";
@@ -268,6 +270,7 @@
             this.DBTablePanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         private System.Windows.Forms.Panel DBTablePanel;
