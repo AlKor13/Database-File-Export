@@ -111,7 +111,7 @@ namespace DatabaseFileExport
             }
             catch (SqlException sqlEx)
             {
-                LogToUser.Log<DialogResult>(LogLevel.Fatal, sqlEx.Message);
+                LogToUser.Log<DialogResult>(LogLevel.Fatal, $"Ошибка выполнения SQL-запроса {sqlEx.Message}");
             }
             catch (FillException fillException)
             {
