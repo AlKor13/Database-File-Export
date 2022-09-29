@@ -64,8 +64,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\GetAllTablesFromDB.cs" />
+    <Compile Include="Classes\DataBaseShemaManager.cs" />
     <Compile Include="Classes\HelpClasses\FileWorker.cs" />
+    <Compile Include="Classes\HelpClasses\SQLQueryExecutor.cs" />
     <Compile Include="Classes\LogToUser.cs" />
     <Compile Include="Classes\SQLDataManager.cs" />
     <Compile Include="Enums\LogLevel.cs" />
