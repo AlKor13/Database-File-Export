@@ -67,3 +67,23 @@ namespace DatabaseFileExport.Classes
             }
         }
 
+        public static async Task<DataTable> GetNotVarBinaryColumnFromTable(string connectionString, string tableName)
+        {
+            try
+            {
+                DataTable columns = await SQLQueryExecutor.Execute(connectionString, new SqlCommand(
+                    $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}' AND DATA_TYPE != 'varbinary' "));
+
+                return columns;
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+    }
+}
