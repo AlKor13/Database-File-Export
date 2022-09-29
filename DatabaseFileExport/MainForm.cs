@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using DatabaseFileExport.Classes;
 using DatabaseFileExport.Classes.HelpClasses;
@@ -17,6 +18,7 @@ namespace DatabaseFileExport
     {
         private static ExportFileModel ExportFileModel;
         private readonly LogToUser LogToUser = new LogToUser();
+        private static Dictionary<string, List<string>> DataBaseVarBinaryTables;
 
         public MainForm()
         {
@@ -29,53 +31,53 @@ namespace DatabaseFileExport
             SelectDataBaseTableComboBox.SelectedText = "Выбрать таблицу";
 
             ExportFileModel = new ExportFileModel();
+            
             if (ConnectionStringTextBox.Text.Length < 5)
             {
                 LogToUser.Log<DialogResult>(LogLevel.Error, "Неверный формат строки подключения!");
+                return;
             }
-            else
+            
+            #region CheckConnectionString
+            
+            try
             {
-                #region CheckConnectionString
-
-                try
-                {
-                    ExportFileModel.Connectionstring = new SqlConnectionStringBuilder(ConnectionStringTextBox.Text);
-
-                    DataTable tablesNames = await GetAllTablesFromDB.Get(ExportFileModel.Connectionstring);
-                    SelectDataBaseTableComboBox.Fill(tablesNames, "TABLE_NAME");
-                    DBTablePanel.Visible = true;
-                }
-                catch (KeyNotFoundException keyEx)
-                {
-                    LogToUser.Log<DialogResult>(LogLevel.Error,
-                        $"Ошибка преобразования строки подключения!\n{keyEx.Message}");
-                }
-                catch (FormatException formatEx)
-                {
-                    LogToUser.Log<DialogResult>(LogLevel.Error,
-                        $"Неверный формат строки подключения! \n{formatEx.Message}");
-                }
-                catch (ArgumentException argumentEx)
-                {
-                    LogToUser.Log<DialogResult>(LogLevel.Error,
-                        $"Неверный аргумент строки подключения! \n{argumentEx.Message}");
-                }
-                catch (SqlException sqlEx)
-                {
-                    LogToUser.Log<DialogResult>(LogLevel.Fatal, sqlEx.Message);
-                }
-                catch (FillException fillException)
-                {
-                    LogToUser.Log<DialogResult>(LogLevel.Fatal, fillException.Message);
-                }
-                catch (Exception exception)
-                {
-                    LogToUser.Log<DialogResult>(LogLevel.Error,
-                        $"Ошибка! \n{exception.Message}");
-                }
-                
-                #endregion
+                ExportFileModel.Connectionstring = new SqlConnectionStringBuilder(ConnectionStringTextBox.Text);
+            
+                DataBaseVarBinaryTables = await DataBaseShemaManager.GetVarBinaryTables(ExportFileModel.Connectionstring.ConnectionString);
+                SelectDataBaseTableComboBox.Fill(DataBaseVarBinaryTables.Keys.ToList());
+                DBTablePanel.Visible = true;
             }
+            catch (KeyNotFoundException keyEx)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Error,
+                    $"Ошибка преобразования строки подключения!\n{keyEx.Message}");
+            }
+            catch (FormatException formatEx)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Error,
+                    $"Неверный формат строки подключения! \n{formatEx.Message}");
+            }
+            catch (ArgumentException argumentEx)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Error,
+                    $"Неверный аргумент строки подключения! \n{argumentEx.Message}");
+            }
+            catch (SqlException sqlEx)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Fatal, sqlEx.Message);
+            }
+            catch (FillException fillException)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Fatal, fillException.Message);
+            }
+            catch (Exception exception)
+            {
+                LogToUser.Log<DialogResult>(LogLevel.Error,
+                    $"Ошибка! \n{exception.Message}");
+            }
+            
+            #endregion
         }
 
         private async void SelectDataBaseTableComboBox_SelectionChangeCommitted(object sender, EventArgs e)
@@ -87,28 +89,20 @@ namespace DatabaseFileExport
                 SQLQueryPanel.Visible = false;
                 InsertButton.Visible = false;
                 
-                DBTableNameTextBox.Text = combobox.SelectedItem.ToString();
-                ExportFileModel.DataBaseTable = combobox.SelectedItem.ToString();
+                string selectedTable = combobox.SelectedItem.ToString();
 
-                SqlDataManager getAllColumnsNames = new SqlDataManager(ExportFileModel.Connectionstring.ConnectionString);
-                DataTable tableColumns = await getAllColumnsNames.Execute(new SqlCommand(
-                    $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{ExportFileModel.DataBaseTable}'"));
+                DBTableNameTextBox.Text = selectedTable;
+                ExportFileModel.DataBaseTable = selectedTable;
 
-                DataTable varbinaryColumn = await getAllColumnsNames.Execute(new SqlCommand(
-                    $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{ExportFileModel.DataBaseTable}' AND DATA_TYPE = 'varbinary'"));
+                DataTable tableNotVarbinaryColumns =
+                   await DataBaseShemaManager.GetNotVarBinaryColumnFromTable(
+                        ExportFileModel.Connectionstring.ConnectionString, selectedTable);
 
-                if (varbinaryColumn.Rows.Count == 0)
-                {
-                    LogToUser.Log<DialogResult>(LogLevel.Error,
-                        $"В таблице {ExportFileModel.DataBaseTable} нет столбца с типом varbinary");
-                }
-                else
-                {
-                    ColumnToUpdateComboBox.Fill(varbinaryColumn, "COLUMN_NAME");
-                    FilterTableComboBox.Fill(tableColumns, "COLUMN_NAME");
-                    SQLQueryPanel.Visible = true;
-                    InsertButton.Visible = true;
-                }
+                ColumnToUpdateComboBox.Fill(DataBaseVarBinaryTables[selectedTable]);
+                FilterTableComboBox.Fill(tableNotVarbinaryColumns, "COLUMN_NAME");
+                
+                SQLQueryPanel.Visible = true;
+                InsertButton.Visible = true;
             }
             catch (SqlException sqlEx)
             {
@@ -174,8 +168,7 @@ namespace DatabaseFileExport
                 string filterText = FilterTextBox.Text;
 
                 if (string.IsNullOrWhiteSpace(filterText))
-                    if (LogToUser.Log<DialogResult>(LogLevel.Info, "Поле фильтрации не заполненно.\nПродолжить?") ==
-                        DialogResult.Cancel)
+                    if (LogToUser.Log<DialogResult>(LogLevel.Info, "Поле фильтрации не заполненно.\nПродолжить?") == DialogResult.Cancel)
                         return;
 
                 string updateFileSql =
@@ -186,8 +179,7 @@ namespace DatabaseFileExport
 
                 updateFileCommand.Parameters.AddWithValue("@IM", imageData);
 
-                SqlDataManager updateDbTable = new SqlDataManager(ExportFileModel.Connectionstring.ConnectionString);
-                await updateDbTable.Execute(updateFileCommand);
+                await SQLQueryExecutor.Execute(ExportFileModel.Connectionstring.ConnectionString, updateFileCommand);
 
                 LogToUser.Log<DialogResult>(LogLevel.Info, "Готово");
             }
